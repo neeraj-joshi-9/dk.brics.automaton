@@ -31,10 +31,8 @@ package dk.brics.automaton;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InvalidClassException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OptionalDataException;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.URL;
@@ -54,6 +52,8 @@ public class RunAutomaton implements Serializable {
 	int[] transitions; // delta(state,c) = transitions[state*points.length + getCharClass(c)]
 	char[] points; // char interval start points
 	int[] classmap; // map from char number to class class
+
+	private Automaton a;
 
 	/** 
 	 * Sets alphabet table for optimal run performance. 
@@ -194,10 +194,16 @@ public class RunAutomaton implements Serializable {
 	 *                 method faster in return of a higher memory usage
 	 */
 	public RunAutomaton(Automaton a, boolean tableize) {
+		this.a = a;
 		a.determinize();
 		points = a.getStartPoints();
 		Set<State> states = a.getStates();
 		Automaton.setStateNumbers(states);
+		for(State st : states) {
+			if(st.getAutomatonId() != Automaton.UNASSIGNED_AUTOMATON_ID) {
+				StateRegistry.set(st.number, st.getAutomatonId());
+			}
+		}
 		initial = a.initial.number;
 		size = states.size();
 		accept = new boolean[size];
@@ -286,5 +292,14 @@ public class RunAutomaton implements Serializable {
 	 */
 	public AutomatonMatcher newMatcher(CharSequence s, int startOffset, int endOffset)  {
 		return new AutomatonMatcher(s.subSequence(startOffset, endOffset), this);
+	}
+
+	/**
+	 * Returns the automaton associated with this instance.
+	 * 
+	 * @return the automaton associated with this instance
+	 */
+	public Automaton getAutomaton( ) {
+		return a;
 	}
 }

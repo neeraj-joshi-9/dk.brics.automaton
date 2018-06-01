@@ -59,13 +59,13 @@ public class AutomatonMatcher implements MatchResult {
 	 * This also updates the values for the {@code start}, {@code end}, and
 	 * {@code group} methods.
 	 *
-	 * @return {@code true} if there is a matching subsequence.
+	 * @return the state number if there is a matching subsequence; -1 otherwise.
 	 */
-	public boolean find() {
+	public int find() {
 		int begin;
 		switch(getMatchStart()) {
 			case -2:
-			return false;
+			return -1;
 			case -1:
 			begin = 0;
 				break;
@@ -76,7 +76,7 @@ public class AutomatonMatcher implements MatchResult {
 					begin += 1;
 					if(begin > getChars().length()) {
 						setMatch(-2, -2);
-						return false;
+						return -1;
 					}
 				}
 		}
@@ -90,6 +90,7 @@ public class AutomatonMatcher implements MatchResult {
 			match_start = -1;
 			match_end = -1;
 		}
+		int match_state = -1;
 		int l = getChars().length();
 		while (begin < l) {
 			int p = automaton.getInitialState();
@@ -101,21 +102,22 @@ public class AutomatonMatcher implements MatchResult {
 				    // found a match from begin to (i+1)
 				    match_start = begin;
 				    match_end=(i+1);
+					match_state = new_state;
 				}
 				p = new_state;
 			}
 			if (match_start != -1) {
 				setMatch(match_start, match_end);
-				return true;
+				return match_state;
 			}
 			begin += 1;
 		}
 		if (match_start != -1) {
 			setMatch(match_start, match_end);
-			return true;
+			return automaton.getInitialState();
 		} else {
 			setMatch(-2, -2);
-			return false;
+			return -1;
 		}
 	}
 

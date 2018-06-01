@@ -31,10 +31,8 @@ package dk.brics.automaton;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InvalidClassException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OptionalDataException;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.URL;
@@ -129,7 +127,13 @@ public class Automaton implements Serializable, Cloneable {
 	
 	/** Caches the <code>isDebug</code> state. */
 	static Boolean is_debug = null;
-	
+
+	/** The ID of this automaton **/
+	int automatonId;
+
+	/** Default automaton ID in case no value has been chosen **/
+	static final int UNASSIGNED_AUTOMATON_ID = -1;
+
 	/** 
 	 * Constructs a new automaton that accepts the empty language.
 	 * Using this constructor, automata can be constructed manually from
@@ -267,6 +271,20 @@ public class Automaton implements Serializable, Cloneable {
 		return info;
 	}
 	
+	/**
+	 * Sets the given automaton ID as ID for this automaton. Also iterates through
+	 * all current states and assigns automaton ID to them.
+	 * 
+	 * @param automatonId
+	 *            the automaton ID
+	 */
+	public void setAutomatonId( int automatonId ) {
+		this.automatonId = automatonId;
+		for(State s : getStates()) {
+			s.setAutomatonId( automatonId );
+		}
+	}
+
 	/** 
 	 * Returns the set of states that are reachable from the initial state.
 	 * @return set of {@link State} objects
@@ -651,6 +669,7 @@ public class Automaton implements Serializable, Cloneable {
 					m.put(s, new State());
 				for (State s : states) {
 					State p = m.get(s);
+					p.setAutomatonId( s.getAutomatonId());
 					p.accept = s.accept;
 					if (s == initial)
 						a.initial = p;
@@ -658,6 +677,7 @@ public class Automaton implements Serializable, Cloneable {
 						p.transitions.add(new Transition(t.min, t.max, m.get(t.to)));
 				}
 			}
+			a.setAutomatonId( automatonId );
 			return a;
 		} catch (CloneNotSupportedException e) {
 			throw new RuntimeException(e);
@@ -1100,5 +1120,14 @@ public class Automaton implements Serializable, Cloneable {
 	 */
 	public Automaton shuffle(Automaton a) {
 		return ShuffleOperations.shuffle(this, a);
+	}
+
+	/**
+	 * Returns the automaton ID for this instance.
+	 * 
+	 * @return the automaton ID for this instance
+	 */
+	public int getAutomatonId( ) {
+		return automatonId;
 	}
 }
