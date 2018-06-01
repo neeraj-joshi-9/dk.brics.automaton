@@ -52,10 +52,24 @@ public class State implements Serializable, Comparable<State> {
 	int id;
 	static int next_id;
 	
+	private int automatonId;
+	
 	/** 
 	 * Constructs a new state. Initially, the new state is a reject state. 
 	 */
 	public State() {
+		this(Automaton.UNASSIGNED_AUTOMATON_ID);
+	}
+	
+	/**
+	 * Constructs a new state and remembers the automata ID that it belongs to.
+	 * Initially, the new state is a reject state.
+	 * 
+	 * @param automatonId
+	 *            the automaton ID to associate this state with
+	 */
+	public State(int automatonId) {
+		this.automatonId = automatonId;
 		resetTransitions();
 		id = next_id++;
 	}
@@ -147,6 +161,24 @@ public class State implements Serializable, Comparable<State> {
 		return Arrays.asList(getSortedTransitionArray(to_first));
 	}
 	
+	/**
+	 * Returns the automaton ID for this state.
+	 * 
+	 * @return the automaton ID
+	 */
+	public int getAutomatonId() {
+		return automatonId;
+	}
+	
+	/**
+	 * Sets the automaton ID for this state.
+	 * 
+	 * @param automataId
+	 */
+	public void setAutomatonId( int automataId ) {
+		this.automatonId = automataId;
+	}
+
 	/** 
 	 * Returns string describing this state. Normally invoked via 
 	 * {@link Automaton#toString()}. 
@@ -160,6 +192,9 @@ public class State implements Serializable, Comparable<State> {
 		else
 			b.append(" [reject]");
 		b.append(":\n");
+		if(automatonId != -1) {
+			b.append("automatonId: " + automatonId + "\n");
+		}
 		for (Transition t : transitions)
 			b.append("  ").append(t.toString()).append("\n");
 		return b.toString();

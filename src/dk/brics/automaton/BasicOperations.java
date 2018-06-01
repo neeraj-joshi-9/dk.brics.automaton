@@ -463,11 +463,13 @@ final public class BasicOperations {
 		while (worklist.size() > 0) {
 			Set<State> s = worklist.removeFirst();
 			State r = newstate.get(s);
-			for (State q : s)
+			for (State q : s) {
+				r.setAutomatonId(q.getAutomatonId());
 				if (q.accept) {
 					r.accept = true;
 					break;
 				}
+			}
 			for (int n = 0; n < points.length; n++) {
 				Set<State> p = new HashSet<State>();
 				for (State q : s)

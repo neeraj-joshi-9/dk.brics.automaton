@@ -227,6 +227,19 @@ public class RegExp {
 		return toAutomatonAllowMutate(null, null, true);
 	}
 	
+	/**
+	 * Constructs new <code>Automaton</code> from this <code>RegExp</code>. Same
+	 * as <code>toAutomaton(null)</code> (empty automaton map).
+	 * 
+	 * @param automatonId
+	 *            the ID to be assigned to new <code>Automaton</code>
+	 */
+	public Automaton toAutomaton(int automatonId) {
+		Automaton a = toAutomatonAllowMutate(null, null, true);
+		a.setAutomatonId(automatonId);
+		return a;
+	}
+	
 	/** 
 	 * Constructs new <code>Automaton</code> from this <code>RegExp</code>. 
 	 * Same as <code>toAutomaton(null,minimize)</code> (empty automaton map).
@@ -466,7 +479,7 @@ public class RegExp {
 			b.append(")");
 			break;
 		case REGEXP_CHAR:
-			appendChar(c, b);
+			b.append("\\").append(c);
 			break;
 		case REGEXP_CHAR_RANGE:
 			b.append("[\\").append(from).append("-\\").append(to).append("]");
@@ -478,13 +491,7 @@ public class RegExp {
 			b.append("#");
 			break;
 		case REGEXP_STRING:
-			if (s.indexOf('"') == -1) {
-				b.append("\"").append(s).append("\"");
-			} else {
-				for (int i = 0; i < s.length(); i++) {
-					appendChar(s.charAt(i), b);
-				}
-			}
+			b.append("\"").append(s).append("\"");
 			break;
 		case REGEXP_ANYSTRING:
 			b.append("@");
@@ -507,13 +514,6 @@ public class RegExp {
 			break;
 		}
 		return b;
-	}
-
-	private void appendChar(char c, StringBuilder b) {
-		if ("|&?*+{},![]^-.#@\"()<>\\".indexOf(c) != -1) {
-			b.append("\\");
-		}
-		b.append(c);
 	}
 
 	/** 
